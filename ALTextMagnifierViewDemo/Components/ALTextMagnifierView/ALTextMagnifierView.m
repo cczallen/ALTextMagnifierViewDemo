@@ -199,11 +199,7 @@
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event	{
-	[super touchesEnded:touches withEvent:event];
-	if ([self.superview isKindOfClass:UIScrollView.class]) {
-		[(UIScrollView *)self.superview setScrollEnabled:YES];
-	}
-	
+	[super touchesEnded:touches withEvent:event];	
 	[self removeMagnifierLabel];
 	
 	UITextField * tf = [self getTextFieldByTouch:[touches anyObject]];
@@ -217,6 +213,9 @@
 }
 
 - (void)removeMagnifierLabel	{
+	if ([self.superview isKindOfClass:UIScrollView.class]) {
+		[(UIScrollView *)self.superview setScrollEnabled:YES];
+	}
 	if (!self.isMagnifierEnabled) {
 		return;
 	}

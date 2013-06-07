@@ -59,7 +59,7 @@
 	[self setBackgroundColorForMagnifier:OffwhiteColor];
 	[self setBorderColorForMagnifier:[UIColor grayColor]];
 	[self setBorderWidthForMagnifier:3];
-	[self setOffsetForMagnifier:UIOffsetMake(0, -48)];
+	[self setOffsetForMagnifier:UIOffsetMake(0, -55)];
 	[self setTextAlignmentForMagnifier:NSTextAlignmentCenter];
 	[self setDurationForMagnifierShow:2.5];
 	
@@ -107,26 +107,10 @@
 	return lb;
 }
 
-
-#pragma mark - touches events
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event	{
-	[super touchesBegan:touches withEvent:event];
-	if (!self.isMagnifierEnabled) {
-		return;
+- (void)showMagnifierViewByTextField	:(UITextField *)tf andTouchPoint:(CGPoint)pt	{
+	if (CGPointEqualToPoint(pt, TouchPointInvalid)) {
+		pt = tf.center;
 	}
-	//pass
-	[self touchesMoved:touches withEvent:event];
-}
-
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event	{
-	[super touchesMoved:touches withEvent:event];
-	if (!self.isMagnifierEnabled) {
-		return;
-	}
-	
-	CGPoint pt = [[touches anyObject] locationInView:self];
-	UITextField * tf = [self getTextFieldByTouch:[touches anyObject]];
-	
 	UILabel * label = self.magnifierLabel;
 	if ([[tf text] length] >0) {
 		BOOL isInitMagnifier = (label == nil);
@@ -180,8 +164,46 @@
 	}
 }
 
+- (void)hideMagnifierView	{
+	UILabel * label = self.magnifierLabel;
+	[UIView animateWithDuration:0.2 animations:^(void) {
+		[label setAlpha:0];
+	}];
+}
+
+
+#pragma mark - touches events
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event	{
+	[super touchesBegan:touches withEvent:event];
+	if (!self.isMagnifierEnabled) {
+		return;
+	}
+	//pass
+	[self touchesMoved:touches withEvent:event];
+
+	if ([self.superview isKindOfClass:UIScrollView.class]) {
+		[(UIScrollView *)self.superview setScrollEnabled:NO];
+	}
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event	{
+	[super touchesMoved:touches withEvent:event];
+	if (!self.isMagnifierEnabled) {
+		return;
+	}
+	
+	CGPoint pt = [[touches anyObject] locationInView:self];
+	UITextField * tf = [self getTextFieldByTouch:[touches anyObject]];
+	
+	[self showMagnifierViewByTextField:tf andTouchPoint:pt];
+}
+
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event	{
 	[super touchesEnded:touches withEvent:event];
+	if ([self.superview isKindOfClass:UIScrollView.class]) {
+		[(UIScrollView *)self.superview setScrollEnabled:YES];
+	}
+	
 	[self removeMagnifierLabel];
 	
 	UITextField * tf = [self getTextFieldByTouch:[touches anyObject]];
@@ -203,6 +225,32 @@
 	
 	[UIView cancelPreviousPerformRequestsWithTarget:view selector:@selector(removeFromSuperviewWithAnimation) object:nil];
 	[view performSelector:@selector(removeFromSuperviewWithAnimation) withObject:nil afterDelay:self.durationForMagnifierShow];
+}
+
+
+#pragma mark -
+- (IBAction)demoMagnifierView	{
+	
+	CGFloat __block delay = 0;
+	[self.subviews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+		if ([obj isKindOfClass:UITextField.class] && [[obj text] length]) {
+			
+			double delayInSeconds = delay;
+			dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
+			dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+				
+				[self showMagnifierViewByTextField:obj andTouchPoint:TouchPointInvalid];
+				[UIView animateWithDuration:0.12 delay:0.35 options:UIViewAnimationOptionCurveEaseOut animations:^(void) {
+					[self.magnifierLabel setAlpha:0];
+				}completion:^(BOOL finished) {
+					[self.magnifierLabel removeFromSuperview];
+				}];
+				
+			});
+			
+			delay += 0.5;
+		}
+	}];
 }
 
 @end

@@ -6,6 +6,7 @@
 //  
 //
 
+#define TouchPointInvalid CGPointMake(-1, -1)
 #import <UIKit/UIKit.h>
 
 
@@ -20,12 +21,18 @@
 @property (nonatomic, strong) 	UIColor * backgroundColorForMagnifier;		//[UIColor colorWithWhite:1.000 alpha:0.970]
 @property (nonatomic, strong) 	UIColor * borderColorForMagnifier;			//[UIColor grayColor]
 @property (nonatomic)			CGFloat   borderWidthForMagnifier;			//3
-@property (nonatomic)			UIOffset	  offsetForMagnifier;				//UIOffsetMake(0, -48)
+@property (nonatomic)			UIOffset	  offsetForMagnifier;				//UIOffsetMake(0, -55)
 @property (nonatomic)			NSTextAlignment  textAlignmentForMagnifier;	//NSTextAlignmentCenter
 @property (nonatomic)			NSTimeInterval  durationForMagnifierShow;	//2.5
 
--(void)myInit;
+- (void)myInit;
 - (UITextField *)getTextFieldByTouch:(UITouch *)touch;
+
+- (void)showMagnifierViewByTextField	:(UITextField *)tf andTouchPoint:(CGPoint)pt;
+- (void)hideMagnifierView;
+- (void)removeMagnifierLabel;
+
+- (IBAction)demoMagnifierView;
 
 @end
 

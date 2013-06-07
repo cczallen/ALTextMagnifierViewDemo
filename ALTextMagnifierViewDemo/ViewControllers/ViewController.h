@@ -12,5 +12,6 @@
 @interface ViewController : UIViewController
 
 @property (weak, nonatomic) IBOutlet ALTextMagnifierView *textMagnifierView;
+- (IBAction)demoAction:(id)sender;
 
 @end

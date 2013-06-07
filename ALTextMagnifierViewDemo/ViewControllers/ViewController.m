@@ -37,4 +37,8 @@
 	[self.textMagnifierView setCenter:pt];
 }
 
+- (IBAction)demoAction:(id)sender {
+	[self.textMagnifierView demoMagnifierView];
+}
+
 @end

@@ -18,7 +18,6 @@
 @interface ALTextMagnifierView ()
 - (UILabel *)creatMagnifierLabel	;
 - (void)removeMagnifierLabel;
-- (UILabel *)getLabelByPoint:(CGPoint)pt	;
 @end
 
 
@@ -62,6 +61,7 @@
 	[self setOffsetForMagnifier:UIOffsetMake(0, -55)];
 	[self setTextAlignmentForMagnifier:NSTextAlignmentCenter];
 	[self setDurationForMagnifierShow:2.5];
+	[self setActiveClasses:@[[UITextField class], [UILabel class]]];
 	
 }
 
@@ -86,39 +86,44 @@
 	return label;
 }
 
-- (UITextField *)getTextFieldByTouch:(UITouch *)touch	{
+- (BOOL)checkIsActiveClasses:(id)obj		{
+	BOOL __block isActiveClasses = NO;
+	[self.activeClasses enumerateObjectsUsingBlock:^(id o, NSUInteger idx, BOOL *stop) {
+		if ([obj isKindOfClass:[o class]]) {
+			isActiveClasses = YES;
+			*stop = YES;
+		}
+	}];
+	return isActiveClasses;
+}
+
+- (UIView *)getTextSubviewByTouch:(UITouch *)touch	{
 	CGPoint pt = [touch locationInView:self];
-	UITextField * tf = nil;
-	for (UIView * subView in self.subviews) {
-		if (CGRectContainsPoint(subView.frame, pt) && [subView isKindOfClass:UITextField.class]) {
-			tf = (UITextField *)subView;		break;
+	UIView * subview = nil;
+	for (UIView * sv in self.subviews) {
+		if (CGRectContainsPoint(sv.frame, pt) && [sv respondsToSelector:@selector(text)] && [self checkIsActiveClasses:sv]) {
+			subview = sv;		break;
 		}
 	}
-	return tf;
+	return subview;
 }
 
-- (UILabel *)getLabelByPoint:(CGPoint)pt		{
-	UILabel * lb = nil;
-	for (UIView * subView in self.subviews) {
-		if (CGRectContainsPoint(subView.frame, pt) && [subView isKindOfClass:UILabel.class]) {
-			lb = (UILabel *)subView;		break;
-		}
+- (void)showMagnifierViewBySubview:(UIView *)subview andTouchPoint:(CGPoint)pt	{
+	if (![subview respondsToSelector:@selector(text)] || ![self checkIsActiveClasses:subview]) {
+		return;
 	}
-	return lb;
-}
-
-- (void)showMagnifierViewByTextField	:(UITextField *)tf andTouchPoint:(CGPoint)pt	{
 	if (CGPointEqualToPoint(pt, TouchPointInvalid)) {
-		pt = tf.center;
+		pt = subview.center;
 	}
 	UILabel * label = self.magnifierLabel;
-	if ([[tf text] length] >0) {
+	NSString * text = [subview performSelector:@selector(text)];
+	if ([text length] >0) {
 		BOOL isInitMagnifier = (label == nil);
 		if (isInitMagnifier) {
 			label = [self creatMagnifierLabel];
 			[self addSubview:label];		[label moveToSuperviewsCenter];
 		}
-		[label setText:tf.text];
+		[label setText:text];
 		
 		//set frame
 		[label sizeToFit];
@@ -142,7 +147,7 @@
 		//show
 		if (isInitMagnifier) {	// || label.alpha <0.1
 			CGRect frame = label.frame;
-			[label setFrame:tf.frame];
+			[label setFrame:subview.frame];
 			[label.layer setBorderWidth:0];
 			[label setAlpha:0.75];
 			
@@ -193,17 +198,17 @@
 	}
 	
 	CGPoint pt = [[touches anyObject] locationInView:self];
-	UITextField * tf = [self getTextFieldByTouch:[touches anyObject]];
+	UIView * subview = [self getTextSubviewByTouch:[touches anyObject]];
 	
-	[self showMagnifierViewByTextField:tf andTouchPoint:pt];
+	[self showMagnifierViewBySubview:subview andTouchPoint:pt];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event	{
 	[super touchesEnded:touches withEvent:event];	
 	[self removeMagnifierLabel];
 	
-	UITextField * tf = [self getTextFieldByTouch:[touches anyObject]];
-	if (tf == nil) {
+	UIView * subview = [self getTextSubviewByTouch:[touches anyObject]];
+	if (subview == nil) {
 		[self.magnifierLabel removeFromSuperviewWithAnimation];
 	}
 }
@@ -232,13 +237,13 @@
 	
 	CGFloat __block delay = 0;
 	[self.subviews enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-		if ([obj isKindOfClass:UITextField.class] && [[obj text] length]) {
+		if ([obj respondsToSelector:@selector(text)]  && [self checkIsActiveClasses:obj] && [[obj text] length]) {
 			
 			double delayInSeconds = delay;
 			dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
 			dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
 				
-				[self showMagnifierViewByTextField:obj andTouchPoint:TouchPointInvalid];
+				[self showMagnifierViewBySubview:obj andTouchPoint:TouchPointInvalid];
 				[UIView animateWithDuration:0.12 delay:0.35 options:UIViewAnimationOptionCurveEaseOut animations:^(void) {
 					[self.magnifierLabel setAlpha:0];
 				}completion:^(BOOL finished) {

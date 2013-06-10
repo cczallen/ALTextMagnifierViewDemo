@@ -6,3 +6,5 @@
 *.xcuserstate
 
 ALTextMagnifierViewDemo.xcodeproj/project.xcworkspace/xcuserdata/alee.xcuserdatad/UserInterfaceState.xcuserstate
+
+*.xcbkptlist

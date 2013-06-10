@@ -19,6 +19,7 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
 	[self.textMagnifierView setMagnifierEnabled:YES];
+	[self.textMagnifierView setActiveClasses:@[[UITextField class], [UILabel class]]];
 }
 
 - (void)didReceiveMemoryWarning

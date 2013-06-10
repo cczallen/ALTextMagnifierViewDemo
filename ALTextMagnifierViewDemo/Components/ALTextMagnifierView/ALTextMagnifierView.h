@@ -24,11 +24,12 @@
 @property (nonatomic)			UIOffset	  offsetForMagnifier;				//UIOffsetMake(0, -55)
 @property (nonatomic)			NSTextAlignment  textAlignmentForMagnifier;	//NSTextAlignmentCenter
 @property (nonatomic)			NSTimeInterval  durationForMagnifierShow;	//2.5
+@property (nonatomic, strong) 	NSArray * activeClasses;					//@[[UITextField class], [UILabel class]]
 
 - (void)myInit;
-- (UITextField *)getTextFieldByTouch:(UITouch *)touch;
+- (UIView *)getTextSubviewByTouch:(UITouch *)touch;
 
-- (void)showMagnifierViewByTextField	:(UITextField *)tf andTouchPoint:(CGPoint)pt;
+- (void)showMagnifierViewBySubview:(UIView *)subview andTouchPoint:(CGPoint)pt;
 - (void)hideMagnifierView;
 - (void)removeMagnifierLabel;
 

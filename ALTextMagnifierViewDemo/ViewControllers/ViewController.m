@@ -34,12 +34,30 @@
 		return;
 	}
 	CGPoint pt = self.view.center;
-	pt.y += 50;
+	pt.y += 55;
 	[self.textMagnifierView setCenter:pt];
 }
 
 - (IBAction)demoAction:(id)sender {
 	[self.textMagnifierView demoMagnifierView];
+}
+
+- (IBAction)activeClassesAction:(id)sender {
+	NSArray * activeClasses = nil;
+	switch ([sender tag]) {
+		case 1:{
+			activeClasses = @[[UITextField class], [UILabel class]];
+		}break;
+		case 2:{
+			activeClasses = @[[UITextField class]];
+		}break;
+		case 3:{
+			activeClasses = @[[UILabel class]];
+		}break;
+		default:
+			break;
+	}
+	[self.textMagnifierView setActiveClasses:activeClasses];
 }
 
 @end

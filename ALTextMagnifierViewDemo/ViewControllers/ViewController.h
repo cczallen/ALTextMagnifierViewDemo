@@ -13,5 +13,6 @@
 
 @property (weak, nonatomic) IBOutlet ALTextMagnifierView *textMagnifierView;
 - (IBAction)demoAction:(id)sender;
+- (IBAction)activeClassesAction:(id)sender;
 
 @end

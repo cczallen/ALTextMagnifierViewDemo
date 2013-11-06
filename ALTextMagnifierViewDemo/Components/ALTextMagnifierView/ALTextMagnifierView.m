@@ -183,12 +183,9 @@
 	if (!self.isMagnifierEnabled) {
 		return;
 	}
+
 	//pass
 	[self touchesMoved:touches withEvent:event];
-
-	if ([self.superview isKindOfClass:UIScrollView.class]) {
-		[(UIScrollView *)self.superview setScrollEnabled:NO];
-	}
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event	{
@@ -199,7 +196,9 @@
 	
 	CGPoint pt = [[touches anyObject] locationInView:self];
 	UIView * subview = [self getTextSubviewByTouch:[touches anyObject]];
-	
+	if (subview && [self.superview isKindOfClass:UIScrollView.class]) {
+		[(UIScrollView *)self.superview setScrollEnabled:NO];
+	}
 	[self showMagnifierViewBySubview:subview andTouchPoint:pt];
 }
 
